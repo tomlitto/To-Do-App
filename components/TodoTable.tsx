@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Todo, Status } from '../types';
 import TimePicker from './TimePicker';
+import { ArrowUpIcon, ArrowDownIcon } from './icons';
 
 interface TodoTableProps {
   todos: Todo[];
@@ -14,7 +15,16 @@ interface TodoTableProps {
   priorityFilter: string;
   onPriorityChange: (priority: string) => void;
   availablePriorities: string[];
+  onSort: (key: keyof Todo) => void;
+  sortConfig: { key: keyof Todo | null; direction: 'ascending' | 'descending' };
 }
+
+const SortIndicator: React.FC<{ direction: 'ascending' | 'descending' | null }> = ({ direction }) => {
+    if (!direction) return <span className="w-4 h-4" />; // placeholder for alignment
+    if (direction === 'ascending') return <ArrowUpIcon className="w-4 h-4 ml-1" />;
+    return <ArrowDownIcon className="w-4 h-4 ml-1" />;
+};
+
 
 const TodoTable: React.FC<TodoTableProps> = ({ 
   todos, 
@@ -27,7 +37,9 @@ const TodoTable: React.FC<TodoTableProps> = ({
   onStatusChange,
   priorityFilter,
   onPriorityChange,
-  availablePriorities
+  availablePriorities,
+  onSort,
+  sortConfig,
 }) => {
   const headerClasses = 'p-2 bg-brand-primary text-brand-text font-semibold border-black border text-sm';
   const cellClasses = 'border-black border';
@@ -152,8 +164,18 @@ const TodoTable: React.FC<TodoTableProps> = ({
                   </div>
                 )}
               </th>
-              <th className={headerClasses}>Planned Duration</th>
-              <th className={headerClasses}>Planned Start</th>
+              <th className={headerClasses}>
+                <button onClick={() => onSort('plannedDuration')} className="w-full h-full flex items-center justify-center p-2 hover:bg-brand-primary/80 transition-colors">
+                    Planned Duration
+                    <SortIndicator direction={sortConfig.key === 'plannedDuration' ? sortConfig.direction : null} />
+                </button>
+              </th>
+              <th className={headerClasses}>
+                <button onClick={() => onSort('plannedStart')} className="w-full h-full flex items-center justify-center p-2 hover:bg-brand-primary/80 transition-colors">
+                    Planned Start
+                    <SortIndicator direction={sortConfig.key === 'plannedStart' ? sortConfig.direction : null} />
+                </button>
+              </th>
               <th className={headerClasses}>Planned End</th>
               <th className={headerClasses}>Actual Start</th>
               <th className={headerClasses}>Actual End</th>
@@ -199,7 +221,7 @@ const TodoTable: React.FC<TodoTableProps> = ({
                       disabled={isDone}
                     >
                       <option value="">--</option>
-                      {Array.from({ length: 12 }, (_, i) => (
+                      {Array.from({ length: 20 }, (_, i) => (
                         <option key={`p-${i + 1}`} value={`P${i + 1}`}>{i + 1}</option>
                       ))}
                     </select>

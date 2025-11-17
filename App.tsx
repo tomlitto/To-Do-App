@@ -12,11 +12,12 @@ import CountdownTimer from './components/CountdownTimer';
 import FocusMusic from './components/FocusMusic';
 import { useTimer } from './hooks/useTimer';
 
+const NUM_TODO_ROWS = 20;
 
 const createInitialTodos = (): Todo[] => {
   const today = new Date();
   const dateString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-  return Array.from({ length: 12 }, (_, i) => ({
+  return Array.from({ length: NUM_TODO_ROWS }, (_, i) => ({
     id: i + 1,
     date: dateString,
     activity: '',
@@ -71,6 +72,11 @@ const App: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('All');
   const [priorityFilter, setPriorityFilter] = useState<string>('All');
   const [categoryFilter, setCategoryFilter] = useState<string>('All');
+  const [sortConfig, setSortConfig] = useState<{ key: keyof Todo | null; direction: 'ascending' | 'descending' }>({
+    key: null,
+    direction: 'ascending',
+  });
+
 
   const { timerString, startTimer, isActive, resetTimer } = useTimer(0);
   const [countdownMinutes, setCountdownMinutes] = useState('30');
@@ -79,12 +85,12 @@ const App: React.FC = () => {
   useEffect(() => {
     try {
       const storedTodos = localStorage.getItem('todos');
-      const initial = createInitialTodos(); // 12 empty rows
+      const initial = createInitialTodos(); // 20 empty rows
       if (storedTodos) {
         const parsedTodos = JSON.parse(storedTodos);
         if (Array.isArray(parsedTodos)) {
           parsedTodos.forEach((todo, index) => {
-            if (todo && typeof todo === 'object' && index < 12) {
+            if (todo && typeof todo === 'object' && index < NUM_TODO_ROWS) {
               // Merge stored todo with an initial one and sanitize types to prevent crashes
               initial[index] = { 
                 ...initial[index], 
@@ -129,8 +135,8 @@ const App: React.FC = () => {
     };
   }, [todos]);
 
-  const filteredTodos = useMemo(() => {
-    return todos.filter(todo => {
+  const displayedTodos = useMemo(() => {
+    const filtered = todos.filter(todo => {
       const status = getTodoStatus(todo);
       let statusMatch = false;
 
@@ -152,7 +158,40 @@ const App: React.FC = () => {
 
       return (statusMatch && priorityMatch && categoryMatch) || isEmptyRow;
     });
-  }, [todos, statusFilter, priorityFilter, categoryFilter]);
+
+    if (sortConfig.key) {
+        filtered.sort((a, b) => {
+            // Keep empty rows at the bottom
+            const aIsEmpty = !a.activity.trim();
+            const bIsEmpty = !b.activity.trim();
+            if (aIsEmpty && !bIsEmpty) return 1;
+            if (!aIsEmpty && bIsEmpty) return -1;
+            if (aIsEmpty && bIsEmpty) return 0;
+            
+            const aValue = a[sortConfig.key!];
+            const bValue = b[sortConfig.key!];
+            
+            let comparison = 0;
+            // Handle numeric sort for duration
+            if (sortConfig.key === 'plannedDuration') {
+                const aNum = Number(aValue) || 0;
+                const bNum = Number(bValue) || 0;
+                if (aNum < bNum) comparison = -1;
+                if (aNum > bNum) comparison = 1;
+            } else { // Handle string/time sort for start time
+                if (!aValue) return 1; // Put empty values at the bottom
+                if (!bValue) return -1;
+                if (aValue < bValue) comparison = -1;
+                if (aValue > bValue) comparison = 1;
+            }
+            
+            return sortConfig.direction === 'ascending' ? comparison : -comparison;
+        });
+    }
+    
+    return filtered;
+
+  }, [todos, statusFilter, priorityFilter, categoryFilter, sortConfig]);
 
   const availablePriorities = useMemo(() => {
     const priorities = new Set(todos.map(t => t.priority.trim()).filter(p => p));
@@ -186,6 +225,14 @@ const App: React.FC = () => {
     newTodos[todoIndex] = updatedTodo;
     setTodos(newTodos);
   };
+  
+  const handleSort = (key: keyof Todo) => {
+    let newDirection: 'ascending' | 'descending' = 'ascending';
+    if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+      newDirection = 'descending';
+    }
+    setSortConfig({ key, direction: newDirection });
+  };
 
   const handleExport = () => {
     const nonEmptyTodos = todos.filter(todo => todo.activity && todo.activity.trim() !== '');
@@ -199,10 +246,10 @@ const App: React.FC = () => {
   const handleImport = async (file: File) => {
     try {
       const importedTodos = await importFromExcel(file);
-      const newTodos = createInitialTodos(); // Start with a clean slate of 12 rows
+      const newTodos = createInitialTodos(); // Start with a clean slate of 20 rows
 
       importedTodos.forEach((todo, index) => {
-        if (index < 12) {
+        if (index < NUM_TODO_ROWS) {
           // Merge imported data into the default structure
           newTodos[index] = { ...newTodos[index], ...todo, id: index + 1 };
         }
@@ -245,7 +292,7 @@ const App: React.FC = () => {
 
           <StatusDisplay todos={todos} />
           <TodoTable 
-            todos={filteredTodos} 
+            todos={displayedTodos} 
             onUpdate={handleUpdateTodo} 
             categoryFilter={categoryFilter}
             onCategoryChange={setCategoryFilter}
@@ -256,6 +303,8 @@ const App: React.FC = () => {
             onPriorityChange={setPriorityFilter}
             availablePriorities={availablePriorities}
             onStartFocusBlock={handleStartFocusBlock}
+            onSort={handleSort}
+            sortConfig={sortConfig}
           />
         </div>
 

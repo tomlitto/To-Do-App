@@ -11,14 +11,14 @@ const Header: React.FC<HeaderProps> = ({ plannedTotalHours, actualTotalHours }) 
       <h1 className="text-5xl font-bold text-red-500">
         Must Do Today
       </h1>
-      <div className="flex gap-4">
-        <div className="text-right bg-black/10 p-2 rounded-md">
-          <div className="text-xs text-brand-text/80 uppercase tracking-wider">Planned Total</div>
-          <div className="text-xl font-bold text-brand-text">{plannedTotalHours.toFixed(2)} hrs</div>
+      <div className="flex gap-6">
+        <div className="text-right bg-black/10 p-3 rounded-md">
+          <div className="text-sm text-brand-text/80 uppercase tracking-wider">Planned Total</div>
+          <div className="text-3xl font-bold text-brand-text">{plannedTotalHours.toFixed(2)} hrs</div>
         </div>
-        <div className="text-right bg-black/10 p-2 rounded-md">
-          <div className="text-xs text-brand-text/80 uppercase tracking-wider">Actual Total</div>
-          <div className="text-xl font-bold text-brand-text">{actualTotalHours.toFixed(2)} hrs</div>
+        <div className="text-right bg-black/10 p-3 rounded-md">
+          <div className="text-sm text-brand-text/80 uppercase tracking-wider">Actual Total</div>
+          <div className="text-3xl font-bold text-brand-text">{actualTotalHours.toFixed(2)} hrs</div>
         </div>
       </div>
     </header>

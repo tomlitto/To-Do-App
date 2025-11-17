@@ -23,8 +23,8 @@ const InspirationalImage: React.FC = () => {
       setImageUrl(null); // Clear previous image while loading
       setCaption(motivationalCaptions[Math.floor(Math.random() * motivationalCaptions.length)]);
 
-      const womanPrompt = "A close-up, portrait-style photo of a beautiful and friendly young woman on a sunny beach. She's wearing a stylish sunhat and smiling playfully at the camera, with a look that says 'Finish your work so we can have fun!' The image should be vibrant, realistic, and highly motivational, reminding the viewer of the vacation that awaits.";
-      const hunkPrompt = "A portrait-style, close-up photo of a handsome, muscular man's face. He is smiling encouragingly at the camera, motivating the viewer to work hard and be productive. The style is realistic and inspirational.";
+      const womanPrompt = "An animated GIF, cinemagraph style. A close-up, portrait-style photo of a beautiful and friendly young woman on a sunny beach. She's wearing a stylish sunhat and smiling playfully at the camera, with a look that says 'Finish your work so we can have fun!'. Gentle motion in her hair from the breeze and subtle sparkle on the water. The image should be vibrant, realistic, and highly motivational, reminding the viewer of the vacation that awaits.";
+      const hunkPrompt = "An animated GIF, cinemagraph style. A portrait-style, close-up photo of a handsome, muscular man's face. He is smiling encouragingly at the camera, giving a subtle, slow wink to motivate the viewer to work hard and be productive. The style is realistic and inspirational.";
       
       try {
         const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -46,8 +46,9 @@ const InspirationalImage: React.FC = () => {
         if (response.candidates?.[0]?.content?.parts) {
           for (const part of response.candidates[0].content.parts) {
             if (part.inlineData) {
+              const mimeType = part.inlineData.mimeType;
               const base64ImageBytes: string = part.inlineData.data;
-              foundImageUrl = `data:image/png;base64,${base64ImageBytes}`;
+              foundImageUrl = `data:${mimeType};base64,${base64ImageBytes}`;
               break; // Exit after finding the first image
             }
           }
@@ -74,8 +75,8 @@ const InspirationalImage: React.FC = () => {
   };
 
   const altText = imageSubject === 'woman'
-    ? "An AI-generated inspirational image of a woman encouraging hard work."
-    : "An AI-generated inspirational image of a man encouraging hard work.";
+    ? "An AI-generated animated image of a woman encouraging hard work."
+    : "An AI-generated animated image of a man encouraging hard work.";
   const buttonText = imageSubject === 'woman' ? "Change to picture of Hunk" : "Change to picture of Lady";
 
 

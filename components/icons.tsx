@@ -83,3 +83,15 @@ export const KeyboardIcon: React.FC<IconProps> = ({ className }) => (
         <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 12h.008v.008H7.5V12zm3.75 0h.008v.008h-.008V12zm3.75 0h.008v.008h-.008V12zm-7.5 3.75h.008v.008H7.5v-.008zm3.75 0h.008v.008h-.008v-.008zm3.75 0h.008v.008h-.008v-.008zM7.5 8.25h.008v.008H7.5V8.25zm3.75 0h.008v.008h-.008V8.25zm3.75 0h.008v.008h-.008V8.25z" />
     </svg>
 );
+
+export const ArrowUpIcon: React.FC<IconProps> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+    </svg>
+);
+
+export const ArrowDownIcon: React.FC<IconProps> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+    </svg>
+);
